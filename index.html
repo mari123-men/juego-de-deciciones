@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Juego Pixelado en Caverna</title>
+    <style>
+        body {
+            margin: 0;
+            background: black;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        canvas {
+            border: 2px solid white;
+            image-rendering: pixelated; /* Estilo retro */
+        }
+    </style>
+</head>
+<body>
+<canvas id="gameCanvas" width="800" height="450"></canvas>
+
+<script>
+    const canvas = document.getElementById("gameCanvas");
+    const ctx = canvas.getContext("2d");
+
+    const fondo = new Image();
+    fondo.src = "cueva.jpg"; // Fondo de caverna
+
+    const personaje = new Image();
+    personaje.src = "personaje.png"; // Imagen del personaje
+
+    const anchoPersonaje = 50;
+    const altoPersonaje = 50;
+
+    let x = 100;
+    let y = 300;
+    const velocidad = 5;
+    const teclas = {};
+
+    // Control de luz (oscuridad inicial)
+    let luz = 0; // 0 = totalmente oscuro, 1 = completamente iluminado
+
+    window.addEventListener("keydown", (e) => {
+        teclas[e.key] = true;
+    });
+
+    window.addEventListener("keyup", (e) => {
+        teclas[e.key] = false;
+    });
+
+    function actualizar() {
+        if (teclas["ArrowRight"] && x + anchoPersonaje < canvas.width) x += velocidad;
+        if (teclas["ArrowLeft"] && x > 0) x -= velocidad;
+        if (teclas["ArrowUp"] && y > 0) y -= velocidad;
+        if (teclas["ArrowDown"] && y + altoPersonaje < canvas.height) y += velocidad;
+
+        // Iluminación gradual
+        if (luz < 1) {
+            luz += 0.01; // velocidad de aparición de luz
+        }
+    }
+
+    function dibujar() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        // Fondo y personaje
+        ctx.drawImage(fondo, 0, 0, canvas.width, canvas.height);
+        ctx.drawImage(personaje, x, y, anchoPersonaje, altoPersonaje);
+
+        // Capa oscura encima, que se va haciendo transparente
+        ctx.fillStyle = `rgba(0, 0, 0, ${1 - luz})`;
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+    }
+
+    function bucle() {
+        actualizar();
+        dibujar();
+        requestAnimationFrame(bucle);
+    }
+
+    fondo.onload = () => {
+        personaje.onload = () => {
+            bucle();
+        };
+    };
+</script>
+</body>
+</html>
+
+
